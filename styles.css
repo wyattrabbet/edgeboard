@@ -282,7 +282,7 @@ h3 {
 table {
   width: 100%;
   border-collapse: collapse;
-  min-width: 920px;
+  min-width: 1010px;
 }
 
 th,
@@ -356,6 +356,26 @@ tbody tr.flagged {
   color: var(--text);
   font-size: 0.82rem;
   white-space: nowrap;
+}
+
+.next-matchup {
+  display: inline-flex;
+  min-width: 58px;
+  color: #aaf4e4;
+  font-size: 0.88rem;
+  font-weight: 850;
+  white-space: nowrap;
+}
+
+.team-context {
+  display: grid;
+  gap: 5px;
+}
+
+.team-context small {
+  color: #aaf4e4;
+  font-size: 0.8rem;
+  font-weight: 800;
 }
 
 .pill {

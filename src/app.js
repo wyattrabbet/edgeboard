@@ -7,6 +7,7 @@ const state = {
 
 const formatPct = (value) => `${(value * 100).toFixed(1)}%`;
 const formatPoints = (games) => games.map((game) => game.points).join(" / ");
+const nextLabel = (nextOpponent) => nextOpponent || "TBD";
 
 const signalFor = (player) => {
   const lastTwo = player.lastFive.slice(0, 2);
@@ -94,6 +95,7 @@ const renderNbaPlayers = (players) => {
             </span>
           </td>
           <td>${player.team}</td>
+          <td><span class="next-matchup">${nextLabel(player.nextOpponent)}</span></td>
           <td>${player.ppg.toFixed(1)}</td>
           <td>${formatPct(player.seasonFg)}</td>
           <td>${renderPointStack(lastTwo)}</td>
@@ -119,7 +121,10 @@ const renderMlbGames = (games) => {
             .map(
               (team) => `
                 <div class="team-row">
-                  <strong>${team.name}</strong>
+                  <span class="team-context">
+                    <strong>${team.name}</strong>
+                    <small>Next: ${nextLabel(team.nextOpponent)}</small>
+                  </span>
                   <span class="hit-total">
                     <strong>${team.previousTwoGameHits.reduce((sum, value) => sum + value, 0)}</strong>
                     <small>${team.previousTwoGameHits.join(" + ")} hits</small>

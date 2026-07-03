@@ -60,6 +60,44 @@ const loadEspnScoreboard = async (sportPath) => {
   return (data.events ?? []).map(toEspnGame);
 };
 
+const buildNextOpponentMap = (games) => {
+  const map = new Map();
+
+  games.forEach((game) => {
+    if (!map.has(game.away)) map.set(game.away, `@ ${game.home}`);
+    if (!map.has(game.home)) map.set(game.home, `vs ${game.away}`);
+    if (game.awayFull && !map.has(game.awayFull)) map.set(game.awayFull, `@ ${game.homeFull}`);
+    if (game.homeFull && !map.has(game.homeFull)) map.set(game.homeFull, `vs ${game.awayFull}`);
+  });
+
+  return map;
+};
+
+const applyNbaNextOpponents = (players, games) => {
+  const opponents = buildNextOpponentMap(games);
+  return players.map((player) => ({
+    ...player,
+    nextOpponent: opponents.get(player.team) ?? player.nextOpponent,
+  }));
+};
+
+const applyMlbNextOpponents = (sampleGames, espnGames) => {
+  if (!espnGames.length) return sampleGames;
+
+  const opponents = buildNextOpponentMap(espnGames);
+  return sampleGames.map((game) => ({
+    ...game,
+    away: {
+      ...game.away,
+      nextOpponent: opponents.get(game.away.name) ?? game.away.nextOpponent,
+    },
+    home: {
+      ...game.home,
+      nextOpponent: opponents.get(game.home.name) ?? game.home.nextOpponent,
+    },
+  }));
+};
+
 const loadOdds = async (sportKey, apiKey) => {
   if (!apiKey) return [];
 
@@ -90,8 +128,9 @@ export const loadDashboardData = async ({ oddsApiKey }) => {
     const nbaOdds = nbaOddsResult.status === "fulfilled" ? nbaOddsResult.value : [];
     const mlbOdds = mlbOddsResult.status === "fulfilled" ? mlbOddsResult.value : [];
     if (nbaGames.length) data.nba.games = mergeOdds(nbaGames, nbaOdds);
+    if (nbaGames.length) data.nba.players = applyNbaNextOpponents(data.nba.players, nbaGames);
     if (mlbGames.length) {
-      data.mlb.games = data.mlb.games.map((sample, index) => ({
+      data.mlb.games = applyMlbNextOpponents(data.mlb.games, mlbGames).map((sample, index) => ({
         ...sample,
         status: mlbGames[index]?.status ?? sample.status,
       }));
