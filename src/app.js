@@ -13,12 +13,12 @@ const hitDetail = (hits) => (hits?.length ? `${hits.join(" + ")} hits` : "hit fe
 
 const signalFor = (player) => {
   const lastTwo = player.lastFive.slice(0, 2);
-  const drops = lastTwo.map((game) => (player.seasonFg - game.fg) / player.seasonFg);
+  const drops = lastTwo.map((game) => player.seasonFg - game.fg);
   const bothBelowEight = drops.every((drop) => drop >= 0.08);
   const bothBelowTen = drops.every((drop) => drop >= 0.1);
 
-  if (bothBelowTen) return { label: "Heavy dip", level: "severe" };
-  if (bothBelowEight) return { label: "8%+ watch", level: "watch" };
+  if (bothBelowTen) return { label: "10+ pt dip", level: "severe" };
+  if (bothBelowEight) return { label: "8-10 pt dip", level: "watch" };
   if (drops.every((drop) => drop <= -0.04)) return { label: "Heating", level: "hot" };
   return { label: "Neutral", level: "neutral" };
 };
