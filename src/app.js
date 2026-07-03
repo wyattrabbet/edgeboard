@@ -6,6 +6,7 @@ const state = {
 };
 
 const formatPct = (value) => `${(value * 100).toFixed(1)}%`;
+const formatPoints = (games) => games.map((game) => game.points).join(" / ");
 
 const signalFor = (player) => {
   const lastTwo = player.lastFive.slice(0, 2);
@@ -61,6 +62,20 @@ const renderSpark = (games) => {
   `;
 };
 
+const renderPointStack = (games) => `
+  <div class="point-stack">
+    <strong>${formatPoints(games)}</strong>
+    <small>${games.map((game) => formatPct(game.fg)).join(" / ")} FG</small>
+  </div>
+`;
+
+const renderLastFive = (games) => `
+  <div class="last-five">
+    ${renderSpark(games)}
+    <span class="point-list">${formatPoints(games)}</span>
+  </div>
+`;
+
 const renderNbaPlayers = (players) => {
   const tbody = document.querySelector("#nbaPlayers");
   const rows = players
@@ -69,7 +84,7 @@ const renderNbaPlayers = (players) => {
 
   tbody.innerHTML = rows
     .map(({ player, signal }) => {
-      const lastTwo = player.lastFive.slice(0, 2).map((game) => formatPct(game.fg)).join(" / ");
+      const lastTwo = player.lastFive.slice(0, 2);
       return `
         <tr class="${signal.level === "watch" || signal.level === "severe" ? "flagged" : ""}">
           <td>
@@ -81,8 +96,8 @@ const renderNbaPlayers = (players) => {
           <td>${player.team}</td>
           <td>${player.ppg.toFixed(1)}</td>
           <td>${formatPct(player.seasonFg)}</td>
-          <td>${lastTwo}</td>
-          <td>${renderSpark(player.lastFive)}</td>
+          <td>${renderPointStack(lastTwo)}</td>
+          <td>${renderLastFive(player.lastFive)}</td>
           <td><span class="pill ${signal.level}">${signal.label}</span></td>
         </tr>
       `;

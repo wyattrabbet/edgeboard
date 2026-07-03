@@ -282,7 +282,7 @@ h3 {
 table {
   width: 100%;
   border-collapse: collapse;
-  min-width: 760px;
+  min-width: 920px;
 }
 
 th,
@@ -328,6 +328,34 @@ tbody tr.flagged {
   min-height: 5px;
   border-radius: 3px 3px 0 0;
   background: var(--blue);
+}
+
+.point-stack {
+  display: grid;
+  gap: 4px;
+  min-width: 92px;
+}
+
+.point-stack strong,
+.point-list {
+  font-weight: 850;
+}
+
+.point-stack small {
+  color: var(--muted);
+  font-size: 0.76rem;
+  line-height: 1.25;
+}
+
+.last-five {
+  display: grid;
+  gap: 6px;
+}
+
+.point-list {
+  color: var(--text);
+  font-size: 0.82rem;
+  white-space: nowrap;
 }
 
 .pill {
