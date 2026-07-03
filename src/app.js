@@ -8,6 +8,8 @@ const state = {
 const formatPct = (value) => `${(value * 100).toFixed(1)}%`;
 const formatPoints = (games) => games.map((game) => game.points).join(" / ");
 const nextLabel = (nextOpponent) => nextOpponent || "TBD";
+const hitTotal = (hits) => (hits?.length ? hits.reduce((sum, value) => sum + value, 0) : "—");
+const hitDetail = (hits) => (hits?.length ? `${hits.join(" + ")} hits` : "hit feed pending");
 
 const signalFor = (player) => {
   const lastTwo = player.lastFive.slice(0, 2);
@@ -126,8 +128,8 @@ const renderMlbGames = (games) => {
                     <small>Next: ${nextLabel(team.nextOpponent)}</small>
                   </span>
                   <span class="hit-total">
-                    <strong>${team.previousTwoGameHits.reduce((sum, value) => sum + value, 0)}</strong>
-                    <small>${team.previousTwoGameHits.join(" + ")} hits</small>
+                    <strong>${hitTotal(team.previousTwoGameHits)}</strong>
+                    <small>${hitDetail(team.previousTwoGameHits)}</small>
                   </span>
                 </div>
               `,

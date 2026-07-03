@@ -98,6 +98,36 @@ const applyMlbNextOpponents = (sampleGames, espnGames) => {
   }));
 };
 
+const buildTeamHitMap = (games) => {
+  const map = new Map();
+
+  games.forEach((game) => {
+    [game.away, game.home].forEach((team) => {
+      map.set(team.name, team.previousTwoGameHits);
+    });
+  });
+
+  return map;
+};
+
+const toMlbTeam = (name, nextOpponent, hitMap) => ({
+  name,
+  nextOpponent,
+  previousTwoGameHits: hitMap.get(name) ?? null,
+});
+
+const buildMlbSlate = (espnGames, sampleGames) => {
+  if (!espnGames.length) return applyMlbNextOpponents(sampleGames, espnGames);
+
+  const hitMap = buildTeamHitMap(sampleGames);
+  return espnGames.map((game) => ({
+    id: game.id,
+    status: game.status,
+    away: toMlbTeam(game.awayFull, `@ ${game.homeFull}`, hitMap),
+    home: toMlbTeam(game.homeFull, `vs ${game.awayFull}`, hitMap),
+  }));
+};
+
 const loadOdds = async (sportKey, apiKey) => {
   if (!apiKey) return [];
 
@@ -130,10 +160,7 @@ export const loadDashboardData = async ({ oddsApiKey }) => {
     if (nbaGames.length) data.nba.games = mergeOdds(nbaGames, nbaOdds);
     if (nbaGames.length) data.nba.players = applyNbaNextOpponents(data.nba.players, nbaGames);
     if (mlbGames.length) {
-      data.mlb.games = applyMlbNextOpponents(data.mlb.games, mlbGames).map((sample, index) => ({
-        ...sample,
-        status: mlbGames[index]?.status ?? sample.status,
-      }));
+      data.mlb.games = buildMlbSlate(mlbGames, data.mlb.games);
     }
     if (mlbOdds.length) data.mlb.odds = mlbOdds;
     if (nbaOdds.length || mlbOdds.length) data.mode = "Live odds";
