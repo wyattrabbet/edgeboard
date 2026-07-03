@@ -1,0 +1,455 @@
+:root {
+  color-scheme: dark;
+  --bg: #101216;
+  --panel: #181c22;
+  --panel-2: #20262e;
+  --line: #303944;
+  --text: #edf2f6;
+  --muted: #9eabb8;
+  --accent: #39c6a8;
+  --accent-2: #f4c95d;
+  --danger: #ff6b6b;
+  --blue: #6da8ff;
+  --shadow: 0 24px 60px rgba(0, 0, 0, 0.28);
+  font-family:
+    Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+    sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  min-width: 320px;
+  margin: 0;
+  background:
+    linear-gradient(180deg, rgba(57, 198, 168, 0.08), transparent 330px),
+    var(--bg);
+  color: var(--text);
+}
+
+button,
+input {
+  font: inherit;
+}
+
+button {
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--panel-2);
+  color: var(--text);
+  cursor: pointer;
+  transition:
+    border-color 160ms ease,
+    background 160ms ease,
+    transform 160ms ease;
+}
+
+button:hover {
+  border-color: rgba(57, 198, 168, 0.7);
+  transform: translateY(-1px);
+}
+
+.app-shell {
+  width: min(1440px, calc(100% - 32px));
+  margin: 0 auto;
+  padding: 28px 0 40px;
+}
+
+.topbar,
+.section-head,
+.panel-title,
+.source-panel,
+.filters,
+.sport-tabs,
+.market-strip {
+  display: flex;
+  align-items: center;
+}
+
+.topbar {
+  justify-content: space-between;
+  gap: 24px;
+  padding-bottom: 22px;
+}
+
+.eyebrow {
+  margin: 0 0 6px;
+  color: var(--accent);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+h1,
+h2,
+h3,
+p {
+  margin-top: 0;
+}
+
+h1 {
+  margin-bottom: 0;
+  font-size: clamp(2rem, 5vw, 4.8rem);
+  line-height: 0.92;
+}
+
+h2 {
+  margin-bottom: 0;
+  font-size: clamp(1.45rem, 3vw, 2.4rem);
+}
+
+h3 {
+  margin-bottom: 0;
+  font-size: 1rem;
+}
+
+.source-panel {
+  gap: 10px;
+  padding: 10px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: rgba(24, 28, 34, 0.82);
+  box-shadow: var(--shadow);
+}
+
+.source-panel label {
+  display: grid;
+  gap: 4px;
+  color: var(--muted);
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.source-panel input {
+  width: 210px;
+  height: 38px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: #0e1115;
+  color: var(--text);
+  padding: 0 10px;
+}
+
+.source-panel button {
+  height: 38px;
+  padding: 0 14px;
+}
+
+.market-strip {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.market-strip article {
+  min-height: 82px;
+  padding: 16px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--panel);
+}
+
+.market-strip span {
+  display: block;
+  color: var(--muted);
+  font-size: 0.82rem;
+}
+
+.market-strip strong {
+  display: block;
+  margin-top: 8px;
+  font-size: 1.55rem;
+}
+
+.sport-tabs {
+  gap: 8px;
+  margin-bottom: 18px;
+}
+
+.sport-tabs button,
+.filters button {
+  min-width: 72px;
+  height: 36px;
+  padding: 0 14px;
+}
+
+.sport-tabs button.active,
+.filters button.active {
+  border-color: rgba(57, 198, 168, 0.85);
+  background: rgba(57, 198, 168, 0.16);
+}
+
+.sport-view {
+  display: none;
+}
+
+.sport-view.active {
+  display: block;
+}
+
+.section-head {
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.filters {
+  gap: 8px;
+}
+
+.nba-grid {
+  display: grid;
+  grid-template-columns: minmax(280px, 0.82fr) minmax(0, 1.6fr);
+  gap: 16px;
+}
+
+.panel {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--panel);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+
+.panel-title {
+  justify-content: space-between;
+  gap: 16px;
+  padding: 16px;
+  border-bottom: 1px solid var(--line);
+}
+
+.panel-title span {
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+.game-list {
+  display: grid;
+  gap: 10px;
+  padding: 14px;
+}
+
+.game-card {
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #11151a;
+}
+
+.game-card header,
+.odds-row,
+.team-row,
+.signal-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.game-card header {
+  margin-bottom: 12px;
+}
+
+.game-card strong {
+  font-size: 0.95rem;
+}
+
+.game-card small {
+  color: var(--muted);
+}
+
+.odds-row {
+  padding-top: 10px;
+  border-top: 1px solid var(--line);
+  color: var(--muted);
+  font-size: 0.84rem;
+}
+
+.book {
+  color: var(--text);
+  font-weight: 700;
+}
+
+.table-wrap {
+  overflow-x: auto;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 760px;
+}
+
+th,
+td {
+  padding: 13px 14px;
+  border-bottom: 1px solid var(--line);
+  text-align: left;
+  vertical-align: middle;
+}
+
+th {
+  color: var(--muted);
+  font-size: 0.73rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+tbody tr.flagged {
+  background: rgba(244, 201, 93, 0.08);
+}
+
+.player-name {
+  display: grid;
+  gap: 3px;
+  font-weight: 800;
+}
+
+.player-name small {
+  color: var(--muted);
+  font-weight: 600;
+}
+
+.spark {
+  display: grid;
+  grid-template-columns: repeat(5, 18px);
+  align-items: end;
+  gap: 4px;
+  height: 38px;
+}
+
+.spark span {
+  display: block;
+  min-height: 5px;
+  border-radius: 3px 3px 0 0;
+  background: var(--blue);
+}
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  min-height: 26px;
+  padding: 4px 8px;
+  border-radius: 999px;
+  background: rgba(109, 168, 255, 0.15);
+  color: #cfe0ff;
+  font-size: 0.78rem;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.pill.watch {
+  background: rgba(244, 201, 93, 0.15);
+  color: #ffe29b;
+}
+
+.pill.hot {
+  background: rgba(57, 198, 168, 0.16);
+  color: #aaf4e4;
+}
+
+.pill.severe {
+  background: rgba(255, 107, 107, 0.14);
+  color: #ffb1b1;
+}
+
+.mlb-board {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+  padding: 14px;
+}
+
+.mlb-card {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #11151a;
+  overflow: hidden;
+}
+
+.mlb-card header {
+  padding: 14px;
+  border-bottom: 1px solid var(--line);
+}
+
+.mlb-card h3 {
+  margin-bottom: 4px;
+}
+
+.team-row {
+  padding: 14px;
+}
+
+.team-row + .team-row {
+  border-top: 1px solid var(--line);
+}
+
+.hit-total {
+  display: grid;
+  justify-items: end;
+  gap: 4px;
+}
+
+.hit-total strong {
+  font-size: 1.6rem;
+}
+
+.hit-total small {
+  color: var(--muted);
+}
+
+.empty-state {
+  padding: 28px;
+  color: var(--muted);
+}
+
+@media (max-width: 980px) {
+  .topbar,
+  .section-head {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .market-strip,
+  .nba-grid,
+  .mlb-board {
+    grid-template-columns: 1fr;
+  }
+
+  .source-panel {
+    width: 100%;
+    align-items: stretch;
+  }
+
+  .source-panel label {
+    flex: 1;
+  }
+
+  .source-panel input {
+    width: 100%;
+  }
+}
+
+@media (max-width: 620px) {
+  .app-shell {
+    width: min(100% - 20px, 1440px);
+    padding-top: 18px;
+  }
+
+  .source-panel {
+    flex-direction: column;
+  }
+
+  .source-panel button {
+    width: 100%;
+  }
+
+  .market-strip {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}

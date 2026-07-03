@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Edgeboard</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <header class="topbar">
+        <div>
+          <p class="eyebrow">Live sports intelligence</p>
+          <h1>Edgeboard</h1>
+        </div>
+        <div class="source-panel" aria-label="Data controls">
+          <label>
+            <span>Odds API key</span>
+            <input id="oddsApiKey" type="password" autocomplete="off" placeholder="Optional" />
+          </label>
+          <button id="refreshButton" type="button" title="Refresh live feeds">
+            <span aria-hidden="true">↻</span>
+            Refresh
+          </button>
+        </div>
+      </header>
+
+      <section class="market-strip" aria-label="Market overview">
+        <article>
+          <span>NBA flags</span>
+          <strong id="nbaFlagCount">0</strong>
+        </article>
+        <article>
+          <span>MLB games</span>
+          <strong id="mlbGameCount">0</strong>
+        </article>
+        <article>
+          <span>Tracked books</span>
+          <strong>DK · FD</strong>
+        </article>
+        <article>
+          <span>Mode</span>
+          <strong id="dataMode">Sample</strong>
+        </article>
+      </section>
+
+      <nav class="sport-tabs" aria-label="Sports">
+        <button class="active" type="button" data-tab="nba">NBA</button>
+        <button type="button" data-tab="mlb">MLB</button>
+      </nav>
+
+      <section id="nba" class="sport-view active" aria-label="NBA insights">
+        <div class="section-head">
+          <div>
+            <p class="eyebrow">Top 60 in-season scorers</p>
+            <h2>Shooting Regression Watch</h2>
+          </div>
+          <div class="filters" role="group" aria-label="NBA filters">
+            <button class="active" type="button" data-filter="all">All</button>
+            <button type="button" data-filter="flagged">Flagged</button>
+          </div>
+        </div>
+
+        <div class="nba-grid">
+          <section class="panel">
+            <div class="panel-title">
+              <h3>Tonight’s Board</h3>
+              <span id="nbaGameCount">0 games</span>
+            </div>
+            <div id="nbaGames" class="game-list"></div>
+          </section>
+
+          <section class="panel table-panel">
+            <div class="panel-title">
+              <h3>Player Signals</h3>
+              <span>FG% vs season baseline</span>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Player</th>
+                    <th>Team</th>
+                    <th>PPG</th>
+                    <th>Season FG</th>
+                    <th>Last 2</th>
+                    <th>Last 5</th>
+                    <th>Signal</th>
+                  </tr>
+                </thead>
+                <tbody id="nbaPlayers"></tbody>
+              </table>
+            </div>
+          </section>
+        </div>
+      </section>
+
+      <section id="mlb" class="sport-view" aria-label="MLB insights">
+        <div class="section-head">
+          <div>
+            <p class="eyebrow">Team contact form</p>
+            <h2>Previous Two-Game Hit Totals</h2>
+          </div>
+        </div>
+
+        <section class="panel">
+          <div class="panel-title">
+            <h3>Matchups</h3>
+            <span>Hits by team, last two games</span>
+          </div>
+          <div id="mlbGames" class="mlb-board"></div>
+        </section>
+      </section>
+    </main>
+
+    <script type="module" src="./src/app.js"></script>
+  </body>
+</html>
