@@ -2,6 +2,7 @@ import { sampleDashboardData } from "./sampleData.js";
 
 const ODDS_BASE = "https://api.the-odds-api.com/v4/sports";
 const ESPN_BASE = "https://site.api.espn.com/apis/site/v2/sports";
+const MLB_BASE = "https://statsapi.mlb.com/api/v1";
 
 const toEspnGame = (event) => {
   const competition = event.competitions?.[0];
@@ -60,6 +61,99 @@ const loadEspnScoreboard = async (sportPath) => {
   return (data.events ?? []).map(toEspnGame);
 };
 
+const formatDate = (date) => {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+};
+
+const addDays = (date, days) => {
+  const next = new Date(date);
+  next.setDate(next.getDate() + days);
+  return next;
+};
+
+const toMlbStatus = (game) => {
+  const status = game.status?.detailedState ?? game.status?.abstractGameState ?? "Scheduled";
+  const gameDate = new Date(game.gameDate);
+
+  if (Number.isNaN(gameDate.getTime()) || status !== "Scheduled") return status;
+  return gameDate.toLocaleTimeString([], {
+    hour: "numeric",
+    minute: "2-digit",
+    timeZoneName: "short",
+  });
+};
+
+const teamHitsFromGame = (game, teamId) => {
+  const side = game.teams?.away?.team?.id === teamId ? "away" : "home";
+  return game.linescore?.teams?.[side]?.hits ?? null;
+};
+
+const loadMlbSchedule = async (date = new Date()) => {
+  const params = new URLSearchParams({
+    sportId: "1",
+    date: formatDate(date),
+    hydrate: "linescore",
+  });
+  const data = await fetchJson(`${MLB_BASE}/schedule?${params.toString()}`);
+  return (data.dates ?? []).flatMap((day) => day.games ?? []);
+};
+
+const loadMlbPreviousHits = async (teamId, beforeDate) => {
+  const params = new URLSearchParams({
+    sportId: "1",
+    teamId: String(teamId),
+    startDate: formatDate(addDays(beforeDate, -45)),
+    endDate: formatDate(addDays(beforeDate, -1)),
+    hydrate: "linescore",
+  });
+  const data = await fetchJson(`${MLB_BASE}/schedule?${params.toString()}`);
+  const completedGames = (data.dates ?? [])
+    .flatMap((day) => day.games ?? [])
+    .filter((game) => game.status?.abstractGameState === "Final")
+    .sort((a, b) => new Date(b.gameDate) - new Date(a.gameDate));
+
+  return completedGames
+    .map((game) => teamHitsFromGame(game, teamId))
+    .filter((hits) => Number.isFinite(hits))
+    .slice(0, 2);
+};
+
+const loadMlbStatsSlate = async (date = new Date()) => {
+  const games = await loadMlbSchedule(date);
+  const hitCache = new Map();
+
+  const getHits = async (teamId) => {
+    if (!hitCache.has(teamId)) hitCache.set(teamId, loadMlbPreviousHits(teamId, date));
+    return hitCache.get(teamId);
+  };
+
+  return Promise.all(
+    games.map(async (game) => {
+      const awayTeam = game.teams.away.team;
+      const homeTeam = game.teams.home.team;
+      const [awayHits, homeHits] = await Promise.all([getHits(awayTeam.id), getHits(homeTeam.id)]);
+
+      return {
+        id: String(game.gamePk),
+        status: toMlbStatus(game),
+        away: {
+          name: awayTeam.name,
+          nextOpponent: `@ ${homeTeam.name}`,
+          previousTwoGameHits: awayHits.length === 2 ? awayHits : null,
+        },
+        home: {
+          name: homeTeam.name,
+          nextOpponent: `vs ${awayTeam.name}`,
+          previousTwoGameHits: homeHits.length === 2 ? homeHits : null,
+        },
+      };
+    }),
+  );
+};
+
 const buildNextOpponentMap = (games) => {
   const map = new Map();
 
@@ -78,53 +172,6 @@ const applyNbaNextOpponents = (players, games) => {
   return players.map((player) => ({
     ...player,
     nextOpponent: opponents.get(player.team) ?? player.nextOpponent,
-  }));
-};
-
-const applyMlbNextOpponents = (sampleGames, espnGames) => {
-  if (!espnGames.length) return sampleGames;
-
-  const opponents = buildNextOpponentMap(espnGames);
-  return sampleGames.map((game) => ({
-    ...game,
-    away: {
-      ...game.away,
-      nextOpponent: opponents.get(game.away.name) ?? game.away.nextOpponent,
-    },
-    home: {
-      ...game.home,
-      nextOpponent: opponents.get(game.home.name) ?? game.home.nextOpponent,
-    },
-  }));
-};
-
-const buildTeamHitMap = (games) => {
-  const map = new Map();
-
-  games.forEach((game) => {
-    [game.away, game.home].forEach((team) => {
-      map.set(team.name, team.previousTwoGameHits);
-    });
-  });
-
-  return map;
-};
-
-const toMlbTeam = (name, nextOpponent, hitMap) => ({
-  name,
-  nextOpponent,
-  previousTwoGameHits: hitMap.get(name) ?? null,
-});
-
-const buildMlbSlate = (espnGames, sampleGames) => {
-  if (!espnGames.length) return applyMlbNextOpponents(sampleGames, espnGames);
-
-  const hitMap = buildTeamHitMap(sampleGames);
-  return espnGames.map((game) => ({
-    id: game.id,
-    status: game.status,
-    away: toMlbTeam(game.awayFull, `@ ${game.homeFull}`, hitMap),
-    home: toMlbTeam(game.homeFull, `vs ${game.awayFull}`, hitMap),
   }));
 };
 
@@ -147,7 +194,7 @@ export const loadDashboardData = async ({ oddsApiKey }) => {
 
   const [nbaGamesResult, mlbGamesResult, nbaOddsResult, mlbOddsResult] = await Promise.allSettled([
     loadEspnScoreboard("basketball/nba"),
-    loadEspnScoreboard("baseball/mlb"),
+    loadMlbStatsSlate(),
     loadOdds("basketball_nba", oddsApiKey),
     loadOdds("baseball_mlb", oddsApiKey),
   ]);
@@ -160,11 +207,12 @@ export const loadDashboardData = async ({ oddsApiKey }) => {
     if (nbaGames.length) data.nba.games = mergeOdds(nbaGames, nbaOdds);
     if (nbaGames.length) data.nba.players = applyNbaNextOpponents(data.nba.players, nbaGames);
     if (mlbGames.length) {
-      data.mlb.games = buildMlbSlate(mlbGames, data.mlb.games);
+      data.mlb.games = mlbGames;
     }
     if (mlbOdds.length) data.mlb.odds = mlbOdds;
     if (nbaOdds.length || mlbOdds.length) data.mode = "Live odds";
-    else if (nbaGames.length || mlbGames.length) data.mode = "Live schedule";
+    else if (mlbGames.length) data.mode = "Live MLB stats";
+    else if (nbaGames.length) data.mode = "Live schedule";
   } catch (error) {
     console.warn("Using sample dashboard data:", error);
     data.mode = "Sample";

@@ -142,7 +142,7 @@ export const sampleDashboardData = {
       {
         id: "mlb-7",
         status: "8:05 PM ET",
-        away: { name: "Athletics", nextOpponent: "@ Mariners", previousTwoGameHits: [8, 5] },
+        away: { name: "Athletics", nextOpponent: "@ Mariners", previousTwoGameHits: [9, 3] },
         home: { name: "Mariners", nextOpponent: "vs Athletics", previousTwoGameHits: [11, 10] },
       },
       {
