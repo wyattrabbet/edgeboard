@@ -10,6 +10,13 @@ const formatPoints = (games) => games.map((game) => game.points).join(" / ");
 const nextLabel = (nextOpponent) => nextOpponent || "TBD";
 const hitTotal = (hits) => (hits?.length ? hits.reduce((sum, value) => sum + value, 0) : "—");
 const hitDetail = (hits) => (hits?.length ? `${hits.join(" + ")} hits` : "hit feed pending");
+const hitSignal = (hits) => {
+  if (!hits?.length) return { label: "Pending", level: "neutral" };
+  const total = hitTotal(hits);
+  if (total >= 20) return { label: "High form", level: "hot" };
+  if (total <= 10) return { label: "Cold bats", level: "severe" };
+  return { label: "No flag", level: "neutral" };
+};
 
 const signalFor = (player) => {
   const lastTwo = player.lastFive.slice(0, 2);
@@ -116,12 +123,16 @@ const renderMlbGames = (games) => {
       (game) => `
         <article class="mlb-card">
           <header>
-            <h3>${game.away.name} @ ${game.home.name}</h3>
-            <small>${game.status}</small>
+            <div>
+              <h3>${game.away.name} @ ${game.home.name}</h3>
+              <small>${game.status}</small>
+            </div>
+            <span class="market-tag">HITS</span>
           </header>
           ${[game.away, game.home]
-            .map(
-              (team) => `
+            .map((team) => {
+              const signal = hitSignal(team.previousTwoGameHits);
+              return `
                 <div class="team-row">
                   <span class="team-context">
                     <strong>${team.name}</strong>
@@ -131,14 +142,35 @@ const renderMlbGames = (games) => {
                     <strong>${hitTotal(team.previousTwoGameHits)}</strong>
                     <small>${hitDetail(team.previousTwoGameHits)}</small>
                   </span>
+                  <span class="pill ${signal.level}">${signal.label}</span>
                 </div>
-              `,
-            )
+              `;
+            })
             .join("")}
         </article>
       `,
     )
     .join("");
+};
+
+const renderMlbSlate = (games) => {
+  const container = document.querySelector("#mlbSlate");
+  container.innerHTML = [
+    `
+      <button class="slate-chip active" type="button">
+        <strong>All games</strong>
+        <span>${games.length} matchups</span>
+      </button>
+    `,
+    ...games.map(
+      (game) => `
+        <button class="slate-chip" type="button">
+          <strong>${game.away.name} @ ${game.home.name}</strong>
+          <span>${game.status}</span>
+        </button>
+      `,
+    ),
+  ].join("");
 };
 
 const renderMetrics = (data) => {
@@ -157,6 +189,7 @@ const render = () => {
   renderMetrics(state.data);
   renderNbaGames(state.data.nba.games);
   renderNbaPlayers(state.data.nba.players);
+  renderMlbSlate(state.data.mlb.games);
   renderMlbGames(state.data.mlb.games);
 };
 

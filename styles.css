@@ -1,12 +1,14 @@
 :root {
   color-scheme: dark;
   --bg: #101216;
+  --black: #050606;
   --panel: #181c22;
   --panel-2: #20262e;
   --line: #303944;
   --text: #edf2f6;
   --muted: #9eabb8;
-  --accent: #39c6a8;
+  --accent: #65d31f;
+  --accent-dark: #2b870a;
   --accent-2: #f4c95d;
   --danger: #ff6b6b;
   --blue: #6da8ff;
@@ -23,9 +25,7 @@
 body {
   min-width: 320px;
   margin: 0;
-  background:
-    linear-gradient(180deg, rgba(57, 198, 168, 0.08), transparent 330px),
-    var(--bg);
+  background: #090b0d;
   color: var(--text);
 }
 
@@ -47,14 +47,14 @@ button {
 }
 
 button:hover {
-  border-color: rgba(57, 198, 168, 0.7);
+  border-color: rgba(101, 211, 31, 0.75);
   transform: translateY(-1px);
 }
 
 .app-shell {
   width: min(1440px, calc(100% - 32px));
   margin: 0 auto;
-  padding: 28px 0 40px;
+  padding: 18px 0 40px;
 }
 
 .topbar,
@@ -71,7 +71,10 @@ button:hover {
 .topbar {
   justify-content: space-between;
   gap: 24px;
-  padding-bottom: 22px;
+  padding: 14px 16px;
+  border: 1px solid #24292f;
+  border-radius: 8px 8px 0 0;
+  background: var(--black);
 }
 
 .eyebrow {
@@ -92,8 +95,8 @@ p {
 
 h1 {
   margin-bottom: 0;
-  font-size: clamp(2rem, 5vw, 4.8rem);
-  line-height: 0.92;
+  font-size: clamp(1.8rem, 4vw, 3.4rem);
+  line-height: 0.96;
 }
 
 h2 {
@@ -109,10 +112,9 @@ h3 {
 .source-panel {
   gap: 10px;
   padding: 10px;
-  border: 1px solid var(--line);
+  border: 1px solid #2b3138;
   border-radius: 8px;
-  background: rgba(24, 28, 34, 0.82);
-  box-shadow: var(--shadow);
+  background: #111417;
 }
 
 .source-panel label {
@@ -129,29 +131,35 @@ h3 {
   height: 38px;
   border: 1px solid var(--line);
   border-radius: 6px;
-  background: #0e1115;
-  color: var(--text);
-  padding: 0 10px;
+  background: #ffffff;
+  color: #1a1d21;
 }
 
 .source-panel button {
   height: 38px;
   padding: 0 14px;
+  border-color: var(--accent-dark);
+  background: var(--accent-dark);
+  color: var(--text);
 }
 
 .market-strip {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 12px;
-  margin-bottom: 18px;
+  margin-bottom: 0;
+  padding: 12px;
+  border-right: 1px solid #24292f;
+  border-left: 1px solid #24292f;
+  background: #111417;
 }
 
 .market-strip article {
   min-height: 82px;
   padding: 16px;
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  background: var(--panel);
+  border: 1px solid #252b31;
+  border-radius: 4px;
+  background: #1a1e23;
 }
 
 .market-strip span {
@@ -169,6 +177,10 @@ h3 {
 .sport-tabs {
   gap: 8px;
   margin-bottom: 18px;
+  padding: 12px;
+  border: 1px solid #24292f;
+  border-radius: 0 0 8px 8px;
+  background: #0d0f11;
 }
 
 .sport-tabs button,
@@ -181,7 +193,7 @@ h3 {
 .sport-tabs button.active,
 .filters button.active {
   border-color: rgba(57, 198, 168, 0.85);
-  background: rgba(57, 198, 168, 0.16);
+  background: rgba(101, 211, 31, 0.14);
 }
 
 .sport-view {
@@ -209,9 +221,9 @@ h3 {
 }
 
 .panel {
-  border: 1px solid var(--line);
+  border: 1px solid #2a323a;
   border-radius: 8px;
-  background: var(--panel);
+  background: #15191e;
   box-shadow: var(--shadow);
   overflow: hidden;
 }
@@ -220,7 +232,8 @@ h3 {
   justify-content: space-between;
   gap: 16px;
   padding: 16px;
-  border-bottom: 1px solid var(--line);
+  border-bottom: 1px solid #2a323a;
+  background: #171b20;
 }
 
 .panel-title span {
@@ -408,21 +421,29 @@ tbody tr.flagged {
 
 .mlb-board {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 14px;
-  padding: 14px;
+  gap: 0;
+  padding: 0;
 }
 
 .mlb-card {
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  background: #11151a;
+  border: 0;
+  border-radius: 0;
+  background: #111519;
   overflow: hidden;
 }
 
+.mlb-card + .mlb-card {
+  border-top: 1px solid #2a323a;
+}
+
 .mlb-card header {
-  padding: 14px;
-  border-bottom: 1px solid var(--line);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 14px 18px;
+  border-bottom: 1px solid #2a323a;
+  background: #0d1013;
 }
 
 .mlb-card h3 {
@@ -430,11 +451,13 @@ tbody tr.flagged {
 }
 
 .team-row {
-  padding: 14px;
+  display: grid;
+  grid-template-columns: minmax(180px, 1fr) minmax(120px, auto) minmax(92px, auto);
+  padding: 14px 18px;
 }
 
 .team-row + .team-row {
-  border-top: 1px solid var(--line);
+  border-top: 1px solid #242b32;
 }
 
 .hit-total {
@@ -449,6 +472,57 @@ tbody tr.flagged {
 
 .hit-total small {
   color: var(--muted);
+}
+
+.market-tag {
+  min-width: 48px;
+  padding: 5px 8px;
+  border: 1px solid rgba(101, 211, 31, 0.6);
+  border-radius: 4px;
+  color: var(--accent);
+  font-size: 0.72rem;
+  font-weight: 900;
+  text-align: center;
+}
+
+.slate-rail {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding: 12px;
+  border-bottom: 1px solid #2a323a;
+  background: #262a2f;
+}
+
+.slate-chip {
+  display: grid;
+  flex: 0 0 132px;
+  gap: 5px;
+  min-height: 54px;
+  padding: 9px 10px;
+  border-color: #3a4148;
+  border-radius: 3px;
+  background: #353a40;
+  text-align: left;
+}
+
+.slate-chip.active {
+  border-color: var(--accent);
+  background: #222a20;
+}
+
+.slate-chip strong {
+  overflow: hidden;
+  font-size: 0.76rem;
+  line-height: 1.15;
+  text-overflow: ellipsis;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.slate-chip span {
+  color: var(--muted);
+  font-size: 0.68rem;
 }
 
 .empty-state {
