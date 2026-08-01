@@ -93,11 +93,42 @@ const teamHitsFromGame = (game, teamId) => {
   return game.linescore?.teams?.[side]?.hits ?? null;
 };
 
+const probablePitcherName = (game, side) => game.teams?.[side]?.probablePitcher?.fullName ?? "TBD";
+
+const teamRecord = (game, side) => {
+  const record = game.teams?.[side]?.leagueRecord;
+  if (!record) return "TBD";
+  if (record.wins !== undefined && record.losses !== undefined) return `${record.wins}-${record.losses}`;
+  return record.summary ?? "TBD";
+};
+
+const toScore = (value) => {
+  const score = Number(value);
+  return Number.isFinite(score) ? score : null;
+};
+
+const previousGameContext = (game, teamId) => {
+  const side = game.teams?.away?.team?.id === teamId ? "away" : "home";
+  const opponentSide = side === "away" ? "home" : "away";
+  const team = game.teams?.[side];
+  const opponent = game.teams?.[opponentSide];
+  const teamScore = toScore(team?.score);
+  const opponentScore = toScore(opponent?.score);
+  const outcome = teamScore === null || opponentScore === null ? "" : teamScore > opponentScore ? "W" : "L";
+
+  return {
+    date: formatShortDate(new Date(game.gameDate)),
+    hits: teamHitsFromGame(game, teamId),
+    opponent: `${side === "away" ? "@" : "vs"} ${opponent?.team?.name ?? "Opponent"}`,
+    score: teamScore === null || opponentScore === null ? "Final" : `${outcome} ${teamScore}-${opponentScore}`,
+  };
+};
+
 const loadMlbSchedule = async (date = new Date()) => {
   const params = new URLSearchParams({
     sportId: "1",
     date: formatDate(date),
-    hydrate: "linescore",
+    hydrate: "linescore,probablePitcher",
   });
   const data = await fetchJson(`${MLB_BASE}/schedule?${params.toString()}`);
   return (data.dates ?? []).flatMap((day) => day.games ?? []);
@@ -118,10 +149,7 @@ const loadMlbPreviousHits = async (teamId, beforeDate) => {
     .sort((a, b) => new Date(b.gameDate) - new Date(a.gameDate));
 
   return completedGames
-    .map((game) => ({
-      date: formatShortDate(new Date(game.gameDate)),
-      hits: teamHitsFromGame(game, teamId),
-    }))
+    .map((game) => previousGameContext(game, teamId))
     .filter((game) => Number.isFinite(game.hits))
     .slice(0, 2);
 };
@@ -147,11 +175,15 @@ const loadMlbStatsSlate = async (date = new Date()) => {
         away: {
           name: awayTeam.name,
           nextOpponent: `@ ${homeTeam.name}`,
+          record: teamRecord(game, "away"),
+          startingPitcher: probablePitcherName(game, "away"),
           previousTwoGameHits: awayHits.length === 2 ? awayHits : null,
         },
         home: {
           name: homeTeam.name,
           nextOpponent: `vs ${awayTeam.name}`,
+          record: teamRecord(game, "home"),
+          startingPitcher: probablePitcherName(game, "home"),
           previousTwoGameHits: homeHits.length === 2 ? homeHits : null,
         },
       };

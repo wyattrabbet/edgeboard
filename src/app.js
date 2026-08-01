@@ -8,11 +8,30 @@ const state = {
 const formatPct = (value) => `${(value * 100).toFixed(1)}%`;
 const formatPoints = (games) => games.map((game) => game.points).join(" / ");
 const nextLabel = (nextOpponent) => nextOpponent || "TBD";
+const pitcherLabel = (pitcher) => pitcher || "TBD";
+const recordLabel = (record) => record || "TBD";
 const hitValue = (game) => (typeof game === "number" ? game : game?.hits);
 const hitLabel = (game, fallback) => (typeof game === "number" ? fallback : game?.date || fallback);
 const hitTotal = (hits) => (hits?.length ? hits.reduce((sum, game) => sum + hitValue(game), 0) : "—");
 const hitDetail = (hits) => (hits?.length ? `2G total ${hitTotal(hits)}` : "hit feed pending");
 const hitGameValue = (hits, index) => (hits?.length ? hitValue(hits[index]) : "—");
+const hitMeta = (game) => {
+  if (!game || typeof game === "number") return "";
+  return [game.opponent, game.score].filter(Boolean).join(" · ");
+};
+
+const renderHitGame = (hits, index, fallback) => {
+  const game = hits?.[index];
+  const meta = hitMeta(game);
+
+  return `
+    <span class="hit-game">
+      <small>${hitLabel(game, fallback)}</small>
+      <strong>${hitGameValue(hits, index)}</strong>
+      ${meta ? `<em>${meta}</em>` : ""}
+    </span>
+  `;
+};
 
 const hitSignal = (hits) => {
   if (!hits?.length) return { label: "Pending", level: "neutral" };
@@ -141,11 +160,13 @@ const renderMlbGames = (games) => {
                   <span class="team-context">
                     <strong>${team.name}</strong>
                     <small>Next: ${nextLabel(team.nextOpponent)}</small>
+                    <small class="pitcher-line">Pitcher: ${pitcherLabel(team.startingPitcher)}</small>
+                    <small class="record-line">Record: ${recordLabel(team.record)}</small>
                   </span>
                   <span class="hit-total">
                     <span class="hit-games">
-                      <span><small>${hitLabel(team.previousTwoGameHits?.[0], "G-1")}</small><strong>${hitGameValue(team.previousTwoGameHits, 0)}</strong></span>
-                      <span><small>${hitLabel(team.previousTwoGameHits?.[1], "G-2")}</small><strong>${hitGameValue(team.previousTwoGameHits, 1)}</strong></span>
+                      ${renderHitGame(team.previousTwoGameHits, 0, "G-1")}
+                      ${renderHitGame(team.previousTwoGameHits, 1, "G-2")}
                     </span>
                     <small>${hitDetail(team.previousTwoGameHits)}</small>
                   </span>

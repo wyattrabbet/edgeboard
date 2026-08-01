@@ -391,6 +391,14 @@ tbody tr.flagged {
   font-weight: 800;
 }
 
+.team-context .pitcher-line {
+  color: var(--muted);
+}
+
+.team-context .record-line {
+  color: #d7e1eb;
+}
+
 .pill {
   display: inline-flex;
   align-items: center;
@@ -452,7 +460,9 @@ tbody tr.flagged {
 
 .team-row {
   display: grid;
-  grid-template-columns: minmax(180px, 1fr) minmax(150px, auto) minmax(92px, auto);
+  grid-template-columns: minmax(180px, 1fr) minmax(250px, auto) minmax(92px, auto);
+  align-items: center;
+  gap: 16px;
   padding: 14px 18px;
 }
 
@@ -472,15 +482,16 @@ tbody tr.flagged {
 
 .hit-games {
   display: grid;
-  grid-template-columns: repeat(2, 58px);
+  grid-template-columns: repeat(2, minmax(112px, 1fr));
   gap: 8px;
 }
 
-.hit-games span {
+.hit-game {
   display: grid;
   justify-items: center;
   gap: 2px;
-  padding: 7px 8px;
+  min-height: 72px;
+  padding: 7px 8px 8px;
   border: 1px solid #303842;
   border-radius: 4px;
   background: #0b0e11;
@@ -494,6 +505,16 @@ tbody tr.flagged {
 
 .hit-games strong {
   font-size: 1.35rem;
+}
+
+.hit-game em {
+  max-width: 104px;
+  color: var(--muted);
+  font-size: 0.63rem;
+  font-style: normal;
+  font-weight: 750;
+  line-height: 1.12;
+  text-align: center;
 }
 
 .market-tag {
