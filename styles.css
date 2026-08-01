@@ -452,7 +452,7 @@ tbody tr.flagged {
 
 .team-row {
   display: grid;
-  grid-template-columns: minmax(180px, 1fr) minmax(120px, auto) minmax(92px, auto);
+  grid-template-columns: minmax(180px, 1fr) minmax(150px, auto) minmax(92px, auto);
   padding: 14px 18px;
 }
 
@@ -463,15 +463,37 @@ tbody tr.flagged {
 .hit-total {
   display: grid;
   justify-items: end;
-  gap: 4px;
-}
-
-.hit-total strong {
-  font-size: 1.6rem;
+  gap: 6px;
 }
 
 .hit-total small {
   color: var(--muted);
+}
+
+.hit-games {
+  display: grid;
+  grid-template-columns: repeat(2, 58px);
+  gap: 8px;
+}
+
+.hit-games span {
+  display: grid;
+  justify-items: center;
+  gap: 2px;
+  padding: 7px 8px;
+  border: 1px solid #303842;
+  border-radius: 4px;
+  background: #0b0e11;
+}
+
+.hit-games small {
+  color: var(--muted);
+  font-size: 0.65rem;
+  font-weight: 900;
+}
+
+.hit-games strong {
+  font-size: 1.35rem;
 }
 
 .market-tag {
@@ -483,26 +505,6 @@ tbody tr.flagged {
   font-size: 0.72rem;
   font-weight: 900;
   text-align: center;
-}
-
-.matchup-total {
-  display: grid;
-  grid-template-columns: auto auto;
-  align-items: center;
-  justify-items: end;
-  gap: 2px 10px;
-  min-width: 210px;
-}
-
-.matchup-total small {
-  grid-column: 1 / -1;
-  color: var(--muted);
-  font-size: 0.72rem;
-  text-align: right;
-}
-
-.matchup-total strong {
-  font-size: 1.45rem;
 }
 
 .slate-rail {

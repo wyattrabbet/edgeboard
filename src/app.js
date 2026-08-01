@@ -9,20 +9,8 @@ const formatPct = (value) => `${(value * 100).toFixed(1)}%`;
 const formatPoints = (games) => games.map((game) => game.points).join(" / ");
 const nextLabel = (nextOpponent) => nextOpponent || "TBD";
 const hitTotal = (hits) => (hits?.length ? hits.reduce((sum, value) => sum + value, 0) : "—");
-const hitDetail = (hits) => (hits?.length ? `${hits.join(" + ")} hits` : "hit feed pending");
-const matchupHitTotal = (game) => {
-  const away = hitTotal(game.away.previousTwoGameHits);
-  const home = hitTotal(game.home.previousTwoGameHits);
-
-  if (!Number.isFinite(away) || !Number.isFinite(home)) return null;
-  return away + home;
-};
-
-const matchupHitDetail = (game) => {
-  const total = matchupHitTotal(game);
-  if (!Number.isFinite(total)) return "combined feed pending";
-  return `${game.away.name} ${hitTotal(game.away.previousTwoGameHits)} + ${game.home.name} ${hitTotal(game.home.previousTwoGameHits)}`;
-};
+const hitDetail = (hits) => (hits?.length ? `2G total ${hitTotal(hits)}` : "hit feed pending");
+const hitGameValue = (hits, index) => (hits?.length ? hits[index] : "—");
 
 const hitSignal = (hits) => {
   if (!hits?.length) return { label: "Pending", level: "neutral" };
@@ -133,20 +121,15 @@ const renderNbaPlayers = (players) => {
 const renderMlbGames = (games) => {
   const container = document.querySelector("#mlbGames");
   container.innerHTML = games
-    .map((game) => {
-      const combinedHits = matchupHitTotal(game);
-      return `
+    .map(
+      (game) => `
         <article class="mlb-card">
           <header>
             <div>
               <h3>${game.away.name} @ ${game.home.name}</h3>
               <small>${game.status}</small>
             </div>
-            <div class="matchup-total">
-              <span class="market-tag">HITS</span>
-              <strong>${Number.isFinite(combinedHits) ? combinedHits : "—"}</strong>
-              <small>${matchupHitDetail(game)}</small>
-            </div>
+            <span class="market-tag">HITS</span>
           </header>
           ${[game.away, game.home]
             .map((team) => {
@@ -158,7 +141,10 @@ const renderMlbGames = (games) => {
                     <small>Next: ${nextLabel(team.nextOpponent)}</small>
                   </span>
                   <span class="hit-total">
-                    <strong>${hitTotal(team.previousTwoGameHits)}</strong>
+                    <span class="hit-games">
+                      <span><small>G-1</small><strong>${hitGameValue(team.previousTwoGameHits, 0)}</strong></span>
+                      <span><small>G-2</small><strong>${hitGameValue(team.previousTwoGameHits, 1)}</strong></span>
+                    </span>
                     <small>${hitDetail(team.previousTwoGameHits)}</small>
                   </span>
                   <span class="pill ${signal.level}">${signal.label}</span>
@@ -167,8 +153,8 @@ const renderMlbGames = (games) => {
             })
             .join("")}
         </article>
-      `;
-    })
+      `,
+    )
     .join("");
 };
 
