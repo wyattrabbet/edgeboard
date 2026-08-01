@@ -68,6 +68,8 @@ const formatDate = (date) => {
   return `${year}-${month}-${day}`;
 };
 
+const formatShortDate = (date) => `${date.getMonth() + 1}/${date.getDate()}`;
+
 const addDays = (date, days) => {
   const next = new Date(date);
   next.setDate(next.getDate() + days);
@@ -116,8 +118,11 @@ const loadMlbPreviousHits = async (teamId, beforeDate) => {
     .sort((a, b) => new Date(b.gameDate) - new Date(a.gameDate));
 
   return completedGames
-    .map((game) => teamHitsFromGame(game, teamId))
-    .filter((hits) => Number.isFinite(hits))
+    .map((game) => ({
+      date: formatShortDate(new Date(game.gameDate)),
+      hits: teamHitsFromGame(game, teamId),
+    }))
+    .filter((game) => Number.isFinite(game.hits))
     .slice(0, 2);
 };
 

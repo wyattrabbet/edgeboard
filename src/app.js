@@ -8,9 +8,11 @@ const state = {
 const formatPct = (value) => `${(value * 100).toFixed(1)}%`;
 const formatPoints = (games) => games.map((game) => game.points).join(" / ");
 const nextLabel = (nextOpponent) => nextOpponent || "TBD";
-const hitTotal = (hits) => (hits?.length ? hits.reduce((sum, value) => sum + value, 0) : "—");
+const hitValue = (game) => (typeof game === "number" ? game : game?.hits);
+const hitLabel = (game, fallback) => (typeof game === "number" ? fallback : game?.date || fallback);
+const hitTotal = (hits) => (hits?.length ? hits.reduce((sum, game) => sum + hitValue(game), 0) : "—");
 const hitDetail = (hits) => (hits?.length ? `2G total ${hitTotal(hits)}` : "hit feed pending");
-const hitGameValue = (hits, index) => (hits?.length ? hits[index] : "—");
+const hitGameValue = (hits, index) => (hits?.length ? hitValue(hits[index]) : "—");
 
 const hitSignal = (hits) => {
   if (!hits?.length) return { label: "Pending", level: "neutral" };
@@ -142,8 +144,8 @@ const renderMlbGames = (games) => {
                   </span>
                   <span class="hit-total">
                     <span class="hit-games">
-                      <span><small>G-1</small><strong>${hitGameValue(team.previousTwoGameHits, 0)}</strong></span>
-                      <span><small>G-2</small><strong>${hitGameValue(team.previousTwoGameHits, 1)}</strong></span>
+                      <span><small>${hitLabel(team.previousTwoGameHits?.[0], "G-1")}</small><strong>${hitGameValue(team.previousTwoGameHits, 0)}</strong></span>
+                      <span><small>${hitLabel(team.previousTwoGameHits?.[1], "G-2")}</small><strong>${hitGameValue(team.previousTwoGameHits, 1)}</strong></span>
                     </span>
                     <small>${hitDetail(team.previousTwoGameHits)}</small>
                   </span>
