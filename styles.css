@@ -145,7 +145,7 @@ h3 {
 
 .market-strip {
   display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 12px;
   margin-bottom: 0;
   padding: 12px;
@@ -202,77 +202,6 @@ h3 {
 
 .sport-view.active {
   display: block;
-}
-
-.alerts-panel {
-  margin-bottom: 18px;
-}
-
-.alert-list {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 10px;
-  padding: 12px;
-  background: #101317;
-}
-
-.alert-card {
-  display: grid;
-  gap: 8px;
-  min-height: 150px;
-  padding: 14px;
-  border: 1px solid #303842;
-  border-left: 4px solid var(--accent-2);
-  border-radius: 6px;
-  background: #151a20;
-}
-
-.alert-card.hot {
-  border-left-color: #39c6a8;
-}
-
-.alert-card.severe {
-  border-left-color: var(--danger);
-}
-
-.alert-card h4 {
-  margin: 4px 0;
-  font-size: 0.98rem;
-}
-
-.alert-card strong,
-.alert-card p,
-.alert-card small {
-  margin: 0;
-}
-
-.alert-card strong {
-  color: var(--text);
-  font-size: 0.82rem;
-}
-
-.alert-card p {
-  color: #d7e1eb;
-  font-size: 0.78rem;
-  line-height: 1.35;
-}
-
-.alert-card small {
-  color: var(--muted);
-  font-size: 0.72rem;
-  line-height: 1.3;
-}
-
-.alert-sport {
-  display: inline-flex;
-  width: fit-content;
-  padding: 3px 6px;
-  border: 1px solid rgba(101, 211, 31, 0.55);
-  border-radius: 3px;
-  color: var(--accent);
-  font-size: 0.62rem;
-  font-weight: 900;
-  letter-spacing: 0.08em;
 }
 
 .section-head {
@@ -588,17 +517,6 @@ tbody tr.flagged {
   text-align: center;
 }
 
-.market-tag {
-  min-width: 50px;
-  padding: 5px 8px;
-  border: 1px solid rgba(101, 211, 31, 0.6);
-  border-radius: 4px;
-  color: var(--accent);
-  font-size: 0.72rem;
-  font-weight: 900;
-  text-align: center;
-}
-
 .slate-rail {
   display: flex;
   gap: 8px;
@@ -657,10 +575,6 @@ tbody tr.flagged {
     grid-template-columns: 1fr;
   }
 
-  .alert-list {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
   .source-panel {
     width: 100%;
     align-items: stretch;
@@ -693,7 +607,4 @@ tbody tr.flagged {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
-  .alert-list {
-    grid-template-columns: 1fr;
-  }
 }
