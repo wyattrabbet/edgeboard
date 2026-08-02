@@ -15,6 +15,7 @@ const hitLabel = (game, fallback) => (typeof game === "number" ? fallback : game
 const hitTotal = (hits) => (hits?.length ? hits.reduce((sum, game) => sum + hitValue(game), 0) : "—");
 const hitDetail = (hits) => (hits?.length ? `2G total ${hitTotal(hits)}` : "hit feed pending");
 const hitGameValue = (hits, index) => (hits?.length ? hitValue(hits[index]) : "—");
+const previousGameHits = (hits) => (hits?.length ? hitValue(hits[0]) : null);
 const hitMeta = (game) => {
   if (!game || typeof game === "number") return "";
   return [game.opponent, game.score].filter(Boolean).join(" · ");
@@ -53,6 +54,86 @@ const signalFor = (player) => {
   return { label: "Neutral", level: "neutral" };
 };
 
+const recordPct = (record) => {
+  const [wins, losses] = String(record ?? "")
+    .split("-")
+    .map((value) => Number(value));
+  if (!Number.isFinite(wins) || !Number.isFinite(losses) || wins + losses === 0) return null;
+  return wins / (wins + losses);
+};
+
+const addAlert = (alerts, alert) => {
+  alerts.push({
+    level: "watch",
+    sport: "MLB",
+    ...alert,
+  });
+};
+
+const buildMlbAlerts = (games) => {
+  const alerts = [];
+
+  games.forEach((game) => {
+    const awayLastGameHits = previousGameHits(game.away.previousTwoGameHits);
+    const homeLastGameHits = previousGameHits(game.home.previousTwoGameHits);
+    const awayPct = recordPct(game.away.record);
+    const homePct = recordPct(game.home.record);
+    const matchup = `${game.away.name} @ ${game.home.name}`;
+    const pitchers = `${pitcherLabel(game.away.startingPitcher)} vs ${pitcherLabel(game.home.startingPitcher)}`;
+
+    if (awayLastGameHits !== null && homeLastGameHits !== null && awayLastGameHits <= 5 && homeLastGameHits <= 5) {
+      addAlert(alerts, {
+        level: "hot",
+        matchup,
+        market: "Game total over",
+        condition: `If both teams had 5 hits or fewer in their prior game (${game.away.name}: ${awayLastGameHits}, ${game.home.name}: ${homeLastGameHits})`,
+        angle: "Then alert to review betting the game over.",
+        detail: `Pitchers: ${pitchers}`,
+      });
+    }
+
+    if (awayLastGameHits !== null && homeLastGameHits !== null && awayLastGameHits >= 8 && homeLastGameHits >= 8) {
+      addAlert(alerts, {
+        level: "severe",
+        matchup,
+        market: "Game total under",
+        condition: `If both teams had 8 hits or more in their prior game (${game.away.name}: ${awayLastGameHits}, ${game.home.name}: ${homeLastGameHits})`,
+        angle: "Then alert to review betting the game under.",
+        detail: `Pitchers: ${pitchers}`,
+      });
+    }
+
+    if (awayPct !== null && homePct !== null && Math.abs(awayPct - homePct) >= 0.08) {
+      const edgeTeam = awayPct > homePct ? game.away : game.home;
+      const fadeTeam = awayPct > homePct ? game.home : game.away;
+      addAlert(alerts, {
+        matchup,
+        market: `${edgeTeam.name} moneyline`,
+        condition: `If the record gap is 8+ percentage points (${edgeTeam.record} vs ${fadeTeam.record})`,
+        angle: `Then flag ${edgeTeam.name} moneyline pricing against the pitcher matchup: ${pitchers}.`,
+      });
+    }
+  });
+
+  return alerts;
+};
+
+const buildNbaAlerts = (players) =>
+  players
+    .map((player) => ({ player, signal: signalFor(player) }))
+    .filter(({ signal }) => signal.level === "watch" || signal.level === "severe")
+    .slice(0, 8)
+    .map(({ player, signal }) => ({
+      level: signal.level,
+      sport: "NBA",
+      matchup: `${player.name} ${nextLabel(player.nextOpponent)}`,
+      market: "Player points",
+      condition: `If a top scorer is 8+ points below season FG% for two straight games`,
+      angle: `Then flag ${player.name} points props for review before tip.`,
+    }));
+
+const buildBetAlerts = (data) => [...buildMlbAlerts(data.mlb.games), ...buildNbaAlerts(data.nba.players)];
+
 const renderOdds = (game) => {
   if (!game.odds?.length) return `<div class="odds-row"><span>No odds posted</span></div>`;
   return game.odds
@@ -62,6 +143,32 @@ const renderOdds = (game) => {
           <span class="book">${book.book}</span>
           <span>${book.away} ${book.awayPrice} · ${book.home} ${book.homePrice}</span>
         </div>
+      `,
+    )
+    .join("");
+};
+
+const renderBetAlerts = (alerts) => {
+  const container = document.querySelector("#betAlerts");
+  if (!alerts.length) {
+    container.innerHTML = `<div class="empty-state">No bet alerts on the current slate.</div>`;
+    return;
+  }
+
+  container.innerHTML = alerts
+    .slice(0, 12)
+    .map(
+      (alert) => `
+        <article class="alert-card ${alert.level}">
+          <div>
+            <span class="alert-sport">${alert.sport}</span>
+            <h4>${alert.market}</h4>
+            <strong>${alert.matchup}</strong>
+          </div>
+          <p>${alert.condition}</p>
+          <small>${alert.angle}</small>
+          ${alert.detail ? `<small>${alert.detail}</small>` : ""}
+        </article>
       `,
     )
     .join("");
@@ -202,15 +309,18 @@ const renderMlbSlate = (games) => {
 };
 
 const renderMetrics = (data) => {
+  const alerts = buildBetAlerts(data);
   const flagged = data.nba.players.filter((player) => {
     const signal = signalFor(player);
     return signal.level === "watch" || signal.level === "severe";
   }).length;
 
   document.querySelector("#nbaFlagCount").textContent = flagged;
+  document.querySelector("#betAlertCount").textContent = alerts.length;
   document.querySelector("#mlbGameCount").textContent = data.mlb.games.length;
   document.querySelector("#dataMode").textContent = data.mode;
   document.querySelector("#nbaGameCount").textContent = `${data.nba.games.length} games`;
+  renderBetAlerts(alerts);
 };
 
 const render = () => {

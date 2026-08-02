@@ -31,6 +31,10 @@
           <strong id="nbaFlagCount">0</strong>
         </article>
         <article>
+          <span>Bet alerts</span>
+          <strong id="betAlertCount">0</strong>
+        </article>
+        <article>
           <span>MLB games</span>
           <strong id="mlbGameCount">0</strong>
         </article>
@@ -48,6 +52,14 @@
         <button class="active" type="button" data-tab="nba">NBA</button>
         <button type="button" data-tab="mlb">MLB</button>
       </nav>
+
+      <section class="panel alerts-panel" aria-label="Bet alerts">
+        <div class="panel-title">
+          <h3>Bet Alerts</h3>
+          <span>If-then signals from live slate data</span>
+        </div>
+        <div id="betAlerts" class="alert-list"></div>
+      </section>
 
       <section id="nba" class="sport-view active" aria-label="NBA insights">
         <div class="section-head">
@@ -115,6 +127,6 @@
       </section>
     </main>
 
-    <script type="module" src="./src/app.js?v=20260801-records"></script>
+    <script type="module" src="./src/app.js?v=20260801-alert-rules"></script>
   </body>
 </html>
