@@ -395,6 +395,15 @@ tbody tr.flagged {
   color: var(--muted);
 }
 
+.pitcher-block {
+  display: grid;
+  gap: 2px;
+}
+
+.pitcher-block small:last-child {
+  color: #c8d2dc;
+}
+
 .team-context .record-line {
   color: #d7e1eb;
 }
@@ -460,7 +469,7 @@ tbody tr.flagged {
 
 .team-row {
   display: grid;
-  grid-template-columns: minmax(180px, 1fr) minmax(250px, auto) minmax(92px, auto);
+  grid-template-columns: minmax(180px, 1fr) minmax(250px, auto);
   align-items: center;
   gap: 16px;
   padding: 14px 18px;

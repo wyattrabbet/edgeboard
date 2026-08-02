@@ -93,7 +93,50 @@ const teamHitsFromGame = (game, teamId) => {
   return game.linescore?.teams?.[side]?.hits ?? null;
 };
 
-const probablePitcherName = (game, side) => game.teams?.[side]?.probablePitcher?.fullName ?? "TBD";
+const probablePitcher = (game, side) => game.teams?.[side]?.probablePitcher ?? null;
+
+const probablePitcherName = (pitcher) => pitcher?.fullName ?? "TBD";
+
+const pitcherRecord = (stat) => {
+  if (stat?.wins === undefined || stat?.losses === undefined) return "TBD";
+  return `${stat.wins}-${stat.losses}`;
+};
+
+const loadPitcherStats = async (pitcherId, date = new Date()) => {
+  if (!pitcherId) return null;
+
+  const season = String(date.getFullYear());
+  const seasonParams = new URLSearchParams({
+    stats: "season",
+    group: "pitching",
+    season,
+  });
+  const gameLogParams = new URLSearchParams({
+    stats: "gameLog",
+    group: "pitching",
+    season,
+  });
+
+  const [seasonResult, gameLogResult] = await Promise.allSettled([
+    fetchJson(`${MLB_BASE}/people/${pitcherId}/stats?${seasonParams.toString()}`),
+    fetchJson(`${MLB_BASE}/people/${pitcherId}/stats?${gameLogParams.toString()}`),
+  ]);
+
+  const seasonStat = seasonResult.status === "fulfilled" ? seasonResult.value.stats?.[0]?.splits?.[0]?.stat : null;
+  const previousGame = gameLogResult.status === "fulfilled"
+    ? (gameLogResult.value.stats?.[0]?.splits ?? [])
+        .filter((split) => split.stat?.hits !== undefined)
+        .sort((a, b) => new Date(b.date) - new Date(a.date))[0]
+    : null;
+
+  return {
+    era: seasonStat?.era ?? "TBD",
+    record: pitcherRecord(seasonStat),
+    previousHitsAllowed: previousGame?.stat?.hits ?? "TBD",
+    previousDate: previousGame?.date ? formatShortDate(new Date(previousGame.date)) : "",
+    previousOpponent: previousGame?.opponent?.name ?? "",
+  };
+};
 
 const teamRecord = (game, side) => {
   const record = game.teams?.[side]?.leagueRecord;
@@ -157,17 +200,31 @@ const loadMlbPreviousHits = async (teamId, beforeDate) => {
 const loadMlbStatsSlate = async (date = new Date()) => {
   const games = await loadMlbSchedule(date);
   const hitCache = new Map();
+  const pitcherCache = new Map();
 
   const getHits = async (teamId) => {
     if (!hitCache.has(teamId)) hitCache.set(teamId, loadMlbPreviousHits(teamId, date));
     return hitCache.get(teamId);
   };
 
+  const getPitcherStats = async (pitcherId) => {
+    if (!pitcherId) return null;
+    if (!pitcherCache.has(pitcherId)) pitcherCache.set(pitcherId, loadPitcherStats(pitcherId, date));
+    return pitcherCache.get(pitcherId);
+  };
+
   return Promise.all(
     games.map(async (game) => {
       const awayTeam = game.teams.away.team;
       const homeTeam = game.teams.home.team;
-      const [awayHits, homeHits] = await Promise.all([getHits(awayTeam.id), getHits(homeTeam.id)]);
+      const awayPitcher = probablePitcher(game, "away");
+      const homePitcher = probablePitcher(game, "home");
+      const [awayHits, homeHits, awayPitcherStats, homePitcherStats] = await Promise.all([
+        getHits(awayTeam.id),
+        getHits(homeTeam.id),
+        getPitcherStats(awayPitcher?.id),
+        getPitcherStats(homePitcher?.id),
+      ]);
 
       return {
         id: String(game.gamePk),
@@ -176,14 +233,16 @@ const loadMlbStatsSlate = async (date = new Date()) => {
           name: awayTeam.name,
           nextOpponent: `@ ${homeTeam.name}`,
           record: teamRecord(game, "away"),
-          startingPitcher: probablePitcherName(game, "away"),
+          startingPitcher: probablePitcherName(awayPitcher),
+          pitcherStats: awayPitcherStats,
           previousTwoGameHits: awayHits.length === 2 ? awayHits : null,
         },
         home: {
           name: homeTeam.name,
           nextOpponent: `vs ${awayTeam.name}`,
           record: teamRecord(game, "home"),
-          startingPitcher: probablePitcherName(game, "home"),
+          startingPitcher: probablePitcherName(homePitcher),
+          pitcherStats: homePitcherStats,
           previousTwoGameHits: homeHits.length === 2 ? homeHits : null,
         },
       };

@@ -10,6 +10,7 @@ const formatPoints = (games) => games.map((game) => game.points).join(" / ");
 const nextLabel = (nextOpponent) => nextOpponent || "TBD";
 const pitcherLabel = (pitcher) => pitcher || "TBD";
 const recordLabel = (record) => record || "TBD";
+const pitcherStatLabel = (stats, field) => stats?.[field] ?? "TBD";
 const hitValue = (game) => (typeof game === "number" ? game : game?.hits);
 const hitLabel = (game, fallback) => (typeof game === "number" ? fallback : game?.date || fallback);
 const hitTotal = (hits) => (hits?.length ? hits.reduce((sum, game) => sum + hitValue(game), 0) : "—");
@@ -33,12 +34,18 @@ const renderHitGame = (hits, index, fallback) => {
   `;
 };
 
-const hitSignal = (hits) => {
-  if (!hits?.length) return { label: "Pending", level: "neutral" };
-  const total = hitTotal(hits);
-  if (total >= 20) return { label: "High form", level: "hot" };
-  if (total <= 10) return { label: "Cold bats", level: "severe" };
-  return { label: "No flag", level: "neutral" };
+const renderPitcherInfo = (team) => {
+  const stats = team.pitcherStats;
+  const previousGame = stats?.previousHitsAllowed === undefined || stats?.previousHitsAllowed === "TBD"
+    ? "Last hits allowed: TBD"
+    : `Last hits allowed: ${stats.previousHitsAllowed}${stats.previousOpponent ? ` vs ${stats.previousOpponent}` : ""}${stats.previousDate ? ` on ${stats.previousDate}` : ""}`;
+
+  return `
+    <span class="pitcher-block">
+      <small class="pitcher-line">Pitcher: ${pitcherLabel(team.startingPitcher)}</small>
+      <small>ERA: ${pitcherStatLabel(stats, "era")} · W-L: ${pitcherStatLabel(stats, "record")} · ${previousGame}</small>
+    </span>
+  `;
 };
 
 const signalFor = (player) => {
@@ -152,14 +159,13 @@ const renderMlbGames = (games) => {
             </div>
           </header>
           ${[game.away, game.home]
-            .map((team) => {
-              const signal = hitSignal(team.previousTwoGameHits);
-              return `
+            .map(
+              (team) => `
                 <div class="team-row">
                   <span class="team-context">
                     <strong>${team.name}</strong>
                     <small>Next: ${nextLabel(team.nextOpponent)}</small>
-                    <small class="pitcher-line">Pitcher: ${pitcherLabel(team.startingPitcher)}</small>
+                    ${renderPitcherInfo(team)}
                     <small class="record-line">Record: ${recordLabel(team.record)}</small>
                   </span>
                   <span class="hit-total">
@@ -169,10 +175,9 @@ const renderMlbGames = (games) => {
                     </span>
                     <small>${hitDetail(team.previousTwoGameHits)}</small>
                   </span>
-                  <span class="pill ${signal.level}">${signal.label}</span>
                 </div>
-              `;
-            })
+              `,
+            )
             .join("")}
         </article>
       `,
